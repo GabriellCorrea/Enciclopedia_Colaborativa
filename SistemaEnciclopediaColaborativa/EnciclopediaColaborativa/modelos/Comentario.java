@@ -48,6 +48,10 @@ public class Comentario {
         this.idartigo = idartigo;
     }
 
+    public void setIdArtigo(int idArtigo) {
+        this.idartigo = idArtigo;
+    }
+
     public int getIdComentario() {
         return idcomentario;
     }

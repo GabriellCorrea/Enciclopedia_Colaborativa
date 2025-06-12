@@ -81,6 +81,10 @@ public class Artigo implements Avaliavel {
 
     public String getTituloArtigo() { return tituloartigo; }
 
+    public void setTituloArtigo (String artigo) {
+        this.tituloartigo = artigo;
+    }
+
     public void adicionarEditor(Usuario editor) {
         if (editores == null) {
             editores = new ArrayList<Usuario>();

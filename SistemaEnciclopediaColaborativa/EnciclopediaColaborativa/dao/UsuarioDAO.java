@@ -20,7 +20,7 @@ public class UsuarioDAO implements BaseDAO {
         Usuario usuario = (Usuario) objeto;
 
         try {
-            String sql = "INSERT INTO Usuario ( nomeUsuario, dtNascimento, emailUsuario, senhaUsuario, avaliacao ) VALUES (?, ?, ?, ?)";
+            String sql = "INSERT INTO Usuario ( nomeUsuario, dtNascimento, emailUsuario, senhaUsuario, avaliacao ) VALUES (?, ?, ?, ?, ?)";
 
             try (PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -36,8 +36,11 @@ public class UsuarioDAO implements BaseDAO {
                     while (rst.next()) {
                         usuario.setIdUsuario(rst.getInt(1));
 
-                        for (Artigo artigo : usuario.getArtigosCriados()) {
-                            cadastrarAutorias(usuario, artigo);
+                        if (!(usuario.getArtigosCriados() == null)) {
+                            for (Artigo artigo : usuario.getArtigosCriados()) {
+                                if (!(artigo == null))
+                                    cadastrarAutorias(usuario, artigo);
+                            }
                         }
                     }
                 }

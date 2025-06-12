@@ -69,11 +69,13 @@ public class Usuario implements Avaliavel {
     public float getMediaAvaliacoes() {
         int total = 0;
 
-        for (int avaliacao : avaliacoes) {
-            total += avaliacao;
+        if (!(avaliacoes == null)) {
+            for (int avaliacao : avaliacoes) {
+                total += avaliacao;
+            }
+            return (float) total / this.getQtdAvaliacoes();
         }
-
-        return (float) total / this.getQtdAvaliacoes();
+        return 0f;
     }
 
     public void alterarNome(String nomeusuario) {
@@ -113,6 +115,8 @@ public class Usuario implements Avaliavel {
     }
 
     public List<Artigo> getArtigosCriados() {
+        if (artigoscriados == null)
+            return null;
         return artigoscriados;
     }
 

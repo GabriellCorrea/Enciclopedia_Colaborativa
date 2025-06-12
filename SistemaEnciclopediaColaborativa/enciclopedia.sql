@@ -19,7 +19,7 @@ CREATE TABLE PaginaPrincipal (
 -- Artigo (1:N com Pagina Principal)
 CREATE TABLE Artigo (
     idArtigo INT AUTO_INCREMENT PRIMARY KEY,
-    tituloArtigo VARCHAR(30),
+    tituloArtigo VARCHAR(100),
     categoria VARCHAR(50),
     dtUltimaMod DATE,
     idPaginaPrincipal INT,

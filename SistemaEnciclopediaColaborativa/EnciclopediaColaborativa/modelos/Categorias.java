@@ -16,6 +16,8 @@ public enum Categorias {
     }
 
     public static Categorias getCategoriaPorString(String nome) {
+        if (nome == null)
+            return INDEFINIDO;
         switch (nome) {
             case "Arte" -> { return ARTE; }
             case "Biografia" -> { return BIOGRAFIA; }
