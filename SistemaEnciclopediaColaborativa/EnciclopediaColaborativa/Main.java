@@ -119,7 +119,7 @@ public class Main {
 
             // 4.4. O USUÁRIO E OS OUTROS ARTIGOS NÃO SÃO DELETADOS
             System.out.println("\n-> OPERAÇÃO CONCLUÍDA: O primeiro artigo foi deletado.");
-        
+
         } catch (Exception e) {
             System.err.println("!!! OCORREU UM ERRO DURANTE O TESTE !!!");
             e.printStackTrace();

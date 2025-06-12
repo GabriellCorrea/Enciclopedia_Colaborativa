@@ -24,12 +24,13 @@ public class ArtigoDAO implements BaseDAO {
         Artigo artigo = (Artigo) objeto;
 
         try {
-            String sql = "INSERT INTO Artigo ( tituloArtigo, dtUltimaMod ) VALUES (?, ?)";
+            String sql = "INSERT INTO Artigo ( tituloArtigo, dtUltimaMod, categoria ) VALUES (?, ?, ?)";
 
             try (PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
                 pstm.setString(1, artigo.getTituloArtigo());
                 pstm.setDate(2, artigo.getDtUltimaAlteracao());
+                pstm.setString(3, artigo.getCategoria().getNomeCategoria());
 
                 pstm.execute();
 
