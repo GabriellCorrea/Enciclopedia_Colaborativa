@@ -70,12 +70,25 @@ public class Main {
 
             Topico topico = new Topico("Tópico Essencial", "Este é o conteúdo principal.", 0);
             Artigo artigo = new Artigo(autor, "Artigo Rápido", Categorias.TECNOLOGIA, topico, new Date(System.currentTimeMillis()));
-            artigoDAO.salvar(artigo); // Salva o artigo e seu tópico, gerando seus IDs
+            artigoDAO.salvar(artigo);
+
+            Topico topico2 = new Topico("O Impacto de Gutenberg", "A prensa de tipos móveis revolucionou a disseminação do conhecimento na Europa.", 0);
+            Artigo artigo2 = new Artigo(autor, "A Invenção da Imprensa", Categorias.HISTORIA, topico2, new Date(System.currentTimeMillis()));
+            artigoDAO.salvar(artigo2);
+
+            Topico topico3 = new Topico("Análise de Dom Casmurro", "O ciúme e a dúvida são temas centrais na obra de Machado de Assis.", 0);
+            Artigo artigo3 = new Artigo(autor, "O Realismo no Brasil", Categorias.LITERATURA, topico3, new Date(System.currentTimeMillis()));
+            artigoDAO.salvar(artigo3);
+
 
             // Vincula o autor ao artigo na tabela de junção 'Escreve'
             usuarioDAO.cadastrarAutorias(autor, artigo);
+            usuarioDAO.cadastrarAutorias(autor, artigo2);
+            usuarioDAO.cadastrarAutorias(autor, artigo3); // Vincula ao mesmo 'autor'
 
             System.out.println("-> CRIADO: Artigo ID " + artigo.getIdArtigo() + " por Usuário ID " + autor.getIdUsuario());
+            System.out.println("-> CRIADO: Artigo ID " + artigo2.getIdArtigo() + " Por Usuário ID " + autor.getIdUsuario());
+            System.out.println("-> CRIADO: Artigo ID " + artigo3.getIdArtigo() + " Por Usuário ID " + autor.getIdUsuario());
 
             // --- 2. LER (READ) ---
             Artigo artigoDoBanco = (Artigo) artigoDAO.buscarPorId(artigo.getIdArtigo());
@@ -86,25 +99,27 @@ public class Main {
             artigoDAO.atualizar(artigoDoBanco);
             System.out.println("-> ATUALIZADO: Novo título é '" + artigoDoBanco.getTituloArtigo() + "'");
 
-            // --- 4. DELETAR (DELETE) ---
-            // Para deletar um artigo, é preciso remover as dependências primeiro.
-            System.out.println("-> DELETANDO em ordem: Vínculo -> Tópico -> Artigo -> Usuário");
+            System.out.println("-> DELETANDO apenas o primeiro artigo ('" + artigo.getTituloArtigo() + "') e suas dependências...");
 
-            // 4.1. Deleta o vínculo da tabela 'Escreve' (necessário para deletar o artigo/usuário)
+            // 4.1. Deleta o vínculo do PRIMEIRO artigo na tabela 'Escreve'
             String sqlDeleteEscreve = "DELETE FROM Escreve WHERE idArtigo = ?";
-            try(PreparedStatement pstm = conn.prepareStatement(sqlDeleteEscreve)) {
+            try (PreparedStatement pstm = conn.prepareStatement(sqlDeleteEscreve)) {
                 pstm.setInt(1, artigo.getIdArtigo());
                 pstm.executeUpdate();
+                System.out.println("-> Vínculo do artigo " + artigo.getIdArtigo() + " removido.");
             }
 
-            // 4.2. Deleta os tópicos associados
+            // 4.2. Deleta o tópico do PRIMEIRO artigo
             topicoDAO.excluir(topico.getIdTopico());
+            System.out.println("-> Tópico do primeiro artigo removido.");
 
-            // 4.3. Deleta o artigo e o usuário
+            // 4.3. Deleta o PRIMEIRO artigo
             artigoDAO.excluir(artigo.getIdArtigo());
-            usuarioDAO.excluir(autor.getIdUsuario());
-            System.out.println("-> DELETADO: Registros de teste removidos com sucesso.");
+            System.out.println("-> Artigo " + artigo.getIdArtigo() + " removido.");
 
+            // 4.4. O USUÁRIO E OS OUTROS ARTIGOS NÃO SÃO DELETADOS
+            System.out.println("\n-> OPERAÇÃO CONCLUÍDA: O primeiro artigo foi deletado.");
+        
         } catch (Exception e) {
             System.err.println("!!! OCORREU UM ERRO DURANTE O TESTE !!!");
             e.printStackTrace();
