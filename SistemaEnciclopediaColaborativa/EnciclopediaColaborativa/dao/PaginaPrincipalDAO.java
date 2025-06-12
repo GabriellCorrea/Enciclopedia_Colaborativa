@@ -1,7 +1,6 @@
 package dao;
 
-import modelos.Artigo;
-import modelos.PaginaPrincipal;
+import modelos.*;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -34,11 +33,11 @@ public class PaginaPrincipalDAO implements BaseDAO {
                 try (ResultSet rst = pstm.getGeneratedKeys()) {
                     while (rst.next()) {
                         paginaPrincipal.setId(rst.getInt(1));
-/*                        for (Artigo artigo : paginaPrincipal.getArtigos()) {
+                        for (Artigo artigo : paginaPrincipal.getArtigos()) {
                             alocarArtigo(paginaPrincipal, artigo);
-                        }*/
                     }
                 }
+            }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -47,11 +46,11 @@ public class PaginaPrincipalDAO implements BaseDAO {
 
     public void alocarArtigo(PaginaPrincipal pg, Artigo art) {
         try {
-            String sql = "INSERT INTO Artigo (idPaginaPrincipal) VALUES ( ? )";
+            String sql = "UPDATE Artigo SET idPaginaPrincipal = ?";
 
             try (PreparedStatement pstm = connection.prepareStatement(sql)) {
 
-                pstm.setInt(1, pg.getId());
+                pstm.setInt(1, pg.getIdPagina());
 
                 pstm.execute();
             }
@@ -70,17 +69,16 @@ public class PaginaPrincipalDAO implements BaseDAO {
 
     @Override
     public ArrayList<Object> listarTodosEagerLoading() {
-        /*CONTINUAR*/
 
         ArrayList<Object> artigos = new ArrayList<>();
-        Artigo ultima = null;
+        Artigo ultima = null; Usuario autor = null;
+        UsuarioDAO usuDAO = new UsuarioDAO(connection);
 
         try {
 
-            String sql = "SELECT pgp.idPaginaPrincipal, art.idArtigo, art.tituloArtigo, art.dtUltimaMod, usu.nomeUsuario AS nomeAutor "
+            String sql = "SELECT pgp.idPaginaPrincipal, art.idArtigo, art.tituloArtigo, art.categoria, art.dtUltimaMod, usu.idUsuario, usu.nomeUsuario AS nomeAutor "
                     + "FROM PaginaPrincipal AS pgp "
-                    + "LEFT JOIN Contem AS cont ON pgp.idPaginaPrincipal = cont.idPaginaPrincipal "
-                    + "LEFT JOIN Artigo AS art ON cont.idArtigo = art.idArtigo "
+                    + "LEFT JOIN Artigo AS art ON pgp.idPaginaPrincipal = art.idPaginaPrincipal "
                     + "LEFT JOIN Escreve AS esc ON art.idArtigo = esc.idArtigo "
                     + "LEFT JOIN Usuario AS usu ON esc.idUsuario = usu.idUsuario;";
 
@@ -89,29 +87,23 @@ public class PaginaPrincipalDAO implements BaseDAO {
 
                 try (ResultSet rst = pstm.getResultSet()) {
                     while (rst.next()) {
-                        if (ultima == null || ultima.getId() != rst.getInt(1)) {
-                            int p_id = rst.getInt(1);
-                            String nome = rst.getString(2);
-                            String cpf = rst.getString(3);
-                            LocalDate data = rst.getObject(4, LocalDate.class);
-                            int idade = rst.getInt(5);
-                            Pessoa p = new Pessoa(p_id, nome, cpf, data, idade);
-                            pessoas.add(p);
-                            ultima = p;
-                        }
+                        if (ultima == null || ultima.getIdArtigo() != rst.getInt(2)) {
+                            int pagp_id = rst.getInt(1);
 
-                        if (rst.getInt(6) != 0) {
-                            int tel_id = rst.getInt(6);
-                            TipoTelefone tipo = TipoTelefone.values()[rst.getInt(7)];
-                            int cod_pais = rst.getInt(8);
-                            int cod_area = rst.getInt(9);
-                            int numero = rst.getInt(10);
-                            Telefone t = new Telefone(tel_id, tipo, cod_pais, cod_area, numero);
-                            ultima.addTelefone(t);
+                            int idArtigo = rst.getInt("idArtigo");
+                            String tituloArtigo = rst.getString("tituloArtigo");
+                            String categoria = rst.getString("categoria");
+                            Date dtultimamod = rst.getDate("dtUltimaMod");
+                            int idAutor = rst.getInt("idUsuario");
+
+                            autor = (Usuario) usuDAO.buscarPorId(idAutor);
+                            Artigo a = new Artigo(autor, idArtigo, tituloArtigo, Categorias.getCategoriaPorString(categoria), dtultimamod);
+                            artigos.add(a);
+                            ultima = a;
                         }
                     }
                 }
-                return pessoas;
+                return artigos;
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

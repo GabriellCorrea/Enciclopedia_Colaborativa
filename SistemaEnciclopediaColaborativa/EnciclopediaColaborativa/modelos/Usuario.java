@@ -2,7 +2,7 @@ package modelos;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Date;
+import java.sql.Date;
 
 public class Usuario implements Avaliavel {
     private int idusuario;
@@ -25,6 +25,14 @@ public class Usuario implements Avaliavel {
         this.emailusuario = emailusuario;
         this.senhausuario = senhausuario;
         this.tipousuario = tipousuario;
+    }
+
+    // Para CRUD
+    public Usuario(int identificador, String nome, String email, Date dtNascimento) {
+        this.idusuario = identificador;
+        this.nomeusuario = nome;
+        this.emailusuario = email;
+        this.dtnascimento = dtNascimento;
     }
 
     public void adicionarAvaliacao(int avaliacao) {

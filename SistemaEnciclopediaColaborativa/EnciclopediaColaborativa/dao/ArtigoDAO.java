@@ -176,6 +176,7 @@ public class ArtigoDAO implements BaseDAO {
             pstm.setString(1, artigo.getTituloArtigo());
             pstm.setString(2, artigo.getCategoria().getNomeCategoria());
             pstm.setDate(3, artigo.getDtUltimaAlteracao());
+            pstm.setInt(4, artigo.getIdArtigo());
 
             for (Topico topico : artigo.getTopicos()) { topDAO.atualizar(topico); }
 

@@ -7,7 +7,8 @@ CREATE TABLE Usuario (
     nomeUsuario VARCHAR(100),
     dtNascimento DATE,
     emailUsuario VARCHAR(50),
-    senhaUsuario VARCHAR(100)
+    senhaUsuario VARCHAR(100),
+    avaliacao FLOAT
 );
 
 -- PaginaPrincipal
@@ -20,7 +21,9 @@ CREATE TABLE Artigo (
     idArtigo INT AUTO_INCREMENT PRIMARY KEY,
     tituloArtigo VARCHAR(30),
     categoria VARCHAR(50),
-    dtUltimaMod DATE
+    dtUltimaMod DATE,
+    idPaginaPrincipal INT,
+    FOREIGN KEY (idPaginaPrincipal) REFERENCES PaginaPrincipal(idPaginaPrincipal)
 );
 
 -- PaginaArtigo (1:1 com Artigo)
