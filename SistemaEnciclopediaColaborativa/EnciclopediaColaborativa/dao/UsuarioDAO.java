@@ -1,9 +1,6 @@
 package dao;
 
-import modelos.Artigo;
-import modelos.Categorias;
-import modelos.Topico;
-import modelos.Usuario;
+import modelos.*;
 
 import java.sql.*;
 import java.sql.Date;
@@ -69,7 +66,7 @@ public class UsuarioDAO implements BaseDAO {
     @Override
     public Object buscarPorId(int idUsuario) {
         try {
-            String sql = "SELECT idUsuario, nomeUsuario, dtNascimento, emailUsuario FROM Usuario WHERE idUsuario = ?";
+            String sql = "SELECT idUsuario, nomeUsuario, dtNascimento, avaliacao, emailUsuario, senhaUsuario FROM Usuario WHERE idUsuario = ?";
 
             try (PreparedStatement pstm = connection.prepareStatement(sql)) {
                 pstm.setInt(1, idUsuario);
@@ -80,8 +77,10 @@ public class UsuarioDAO implements BaseDAO {
                     int identificador = rst.getInt("idUsuario");
                     String nome = rst.getString("nomeUsuario");
                     String email = rst.getString("emailUsuario");
+                    float mediaAvaliacao = rst.getFloat("avaliacao");
+                    String senha = rst.getString("senhaUsuario");
                     Date dtNascimento = rst.getDate("dtNascimento");
-                    return new Usuario(identificador, nome, email, dtNascimento);
+                    return new Usuario(identificador, nome, mediaAvaliacao, email, senha, dtNascimento);
                 }
             }
             return null;
@@ -92,12 +91,78 @@ public class UsuarioDAO implements BaseDAO {
 
     @Override
     public ArrayList<Object> listarTodosLazyLoading() {
-        return null;
-    }
+
+        ArrayList<Object> usuarios = new ArrayList<>();
+
+        try {
+            String sql = "SELECT idUsuario, nomeUsuario, avaliacao, emailUsuario, senhaUsuario, dtNascimento FROM Usuario";
+
+            try (PreparedStatement pstm = connection.prepareStatement(sql)) {
+                pstm.execute();
+                ResultSet rst = pstm.getResultSet();
+                while (rst.next()) {
+                    int idUsuario = rst.getInt("idUsuario");
+                    String nomeUsuario = rst.getString("nomeUsuario");
+                    float avaliacao = rst.getFloat("avaliacao");
+                    String emailUsuario = rst.getString("emailUsuario");
+                    String senhaUsuario = rst.getString("senhaUsuario");
+                    Date dtNasc = rst.getDate("dtNascimento");
+                    Usuario u = new Usuario(idUsuario, nomeUsuario, avaliacao, emailUsuario, senhaUsuario, dtNasc);
+                    usuarios.add(u);
+                }
+            }
+            return usuarios;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }    }
 
     @Override
     public ArrayList<Object> listarTodosEagerLoading() {
-        return null;
+
+        ArrayList<Object> usuarios = new ArrayList<Object>();
+        Usuario ultima = null; Artigo art = null;
+        ArtigoDAO artDAO = new ArtigoDAO(connection);
+
+        try {
+            String sql = "SELECT usu.idUsuario, usu.nomeUsuario, usu.avaliacao, usu.emailUsuario, usu.dtNascimento, esc.idArtigo, art.tituloArtigo, art.categoria, art.dtUltimaMod "
+                    + "FROM Usuario AS usu"
+                    + "LEFT JOIN Escreve AS esc ON usu.idUsuario = esc.idUsuario"
+                    + "LEFT JOIN Artigo AS art ON esc.idArtigo = art.idArtigo;";
+
+            try (PreparedStatement pstm = connection.prepareStatement(sql)) {
+                pstm.execute();
+                ResultSet rst = pstm.getResultSet();
+                while (rst.next()) {
+                    if (ultima == null || ultima.getIdUsuario() != rst.getInt(1)) {
+                        int idUsuario = rst.getInt("idUsuario");
+                        String nomeUsuario = rst.getString("nomeUsuario");
+                        float avaliacao = rst.getFloat("avaliacao");
+                        String emailUsuario = rst.getString("emailUsuario");
+                        Date dtNasc = rst.getDate("dtNascimento");
+                        Usuario u = new Usuario(idUsuario, nomeUsuario, avaliacao, emailUsuario, dtNasc);
+                        usuarios.add(u);
+                        ultima = u;
+                    }
+
+                    if (rst.getInt(7) != 0) {
+
+                        int idArtigo = rst.getInt("idArtigo");
+                        String tituloArtigo = rst.getString("tituloArtigo");
+                        String categoria = rst.getString("categoria");
+                        Date dtultimamod = rst.getDate("dtUltimaMod");
+                        Artigo a = new Artigo(idArtigo, tituloArtigo, Categorias.getCategoriaPorString(categoria), dtultimamod);
+
+                        art = (Artigo) artDAO.buscarPorId(idArtigo);
+                        ultima.adicionarArtigo(art);
+                    }
+
+                }
+            }
+            return usuarios;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -131,7 +196,21 @@ public class UsuarioDAO implements BaseDAO {
     }
 
     @Override
-    public void excluir(int id) {
+    public void excluir(int idUsuario) {
+        try {
+            String sql = "DELETE FROM Usuario WHERE idUsuario = ?";
 
-    }
+            try (PreparedStatement pstm = connection.prepareStatement(sql)) {
+                pstm.setInt(1, idUsuario);
+
+                int linhasAfetadas = pstm.executeUpdate();
+
+                if (linhasAfetadas == 0) {
+                    throw new SQLException("Falha ao deletar: nenhuma linha foi afetada.");
+                } }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
 }
+

@@ -13,6 +13,7 @@ public class Usuario implements Avaliavel {
     private TipoUsuario tipousuario;
     private List<Artigo> artigoscriados;
     private List<Integer> avaliacoes;
+    private float mediaAvaliacoes;
 
     // Só pra teste
     public Usuario(String nome){
@@ -28,11 +29,21 @@ public class Usuario implements Avaliavel {
     }
 
     // Para CRUD
-    public Usuario(int identificador, String nome, String email, Date dtNascimento) {
+    public Usuario(int identificador, String nome, float avaliacao, String email, Date dtNascimento) {
         this.idusuario = identificador;
         this.nomeusuario = nome;
         this.emailusuario = email;
+        this.mediaAvaliacoes = avaliacao;
         this.dtnascimento = dtNascimento;
+    }
+
+    // Para CRUD
+    public Usuario(int idUsuario, String nomeUsuario, float avaliacao, String emailUsuario, String senhaUsuario, Date dtNascimento) {
+        this.idusuario = idUsuario;
+        this.nomeusuario = nomeUsuario;
+        this.emailusuario = emailUsuario;
+        this.dtnascimento = dtNascimento;
+        this.mediaAvaliacoes = avaliacao;
     }
 
     public void adicionarAvaliacao(int avaliacao) {
